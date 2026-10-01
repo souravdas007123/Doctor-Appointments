@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Appointments · CareSlot{% endblock %}
+{% block content %}
+{% include "doctors/_subnav.html" %}
+<h1>Appointments</h1>
+<nav class="subnav" aria-label="Filter">
+  <a href="?scope=today"{% if scope == "today" %} aria-current="page"{% endif %}>Today</a>
+  <a href="?scope=upcoming"{% if scope == "upcoming" %} aria-current="page"{% endif %}>Upcoming</a>
+  <a href="?scope=past"{% if scope == "past" %} aria-current="page"{% endif %}>Past</a>
+</nav>
+{% for a in appointments %}
+  <div class="card" style="margin-bottom:14px">
+    <div class="win">
+      <div>
+        <strong>{% if scope != "today" %}{{ a.appointment_date|date:"D, d M" }} · {% endif %}{{ a.start_time|time:"h:i A" }}</strong>
+        <span class="badge {{ a.status }}">{{ a.get_status_display }}</span>
+        <div>{{ a.patient.user.get_full_name|default:a.patient.user.email }}</div>
+        {% if a.reason %}<div class="muted">{{ a.reason }}</div>{% endif %}
+      </div>
+      <a class="btn" style="text-decoration:none" href="{% url 'appointments:detail' a.pk %}">Open</a>
+    </div>
+  </div>
+{% empty %}
+  <div class="card"><p class="muted">Is list mein koi appointment nahi hai.</p></div>
+{% endfor %}
+{% endblock %}

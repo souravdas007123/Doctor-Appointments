@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Doctor dashboard · CareSlot{% endblock %}
+{% block content %}
+{% include "doctors/_subnav.html" %}
+<h1>Dr. {{ user.last_name|default:user.first_name }}</h1>
+<div class="stats">
+  <div class="card stat"><strong>{{ stats.today }}</strong><span>Today</span></div>
+  <div class="card stat"><strong>{{ stats.patients }}</strong><span>Patients</span></div>
+  <div class="card stat"><strong>₹{{ stats.revenue|floatformat:"-2" }}</strong><span>Payments received</span></div>
+</div>
+<div class="card"><h2>Today's appointments</h2>
+  {% for a in todays %}
+    <div class="dayrow"><strong>{{ a.start_time|time:"h:i A" }}</strong>
+      <div><a href="{% url 'appointments:detail' a.pk %}">{{ a.patient.user.get_full_name|default:a.patient.user.email }}</a>
+        <span class="badge {{ a.status }}">{{ a.get_status_display }}</span></div></div>
+  {% empty %}<p class="muted">Aaj koi appointment nahi hai.</p>{% endfor %}
+  <p><a href="{% url 'appointments:doctor_list' %}">All appointments</a></p>
+</div>
+{% endblock %}

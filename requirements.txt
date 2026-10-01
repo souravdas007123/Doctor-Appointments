@@ -1,0 +1,7 @@
+Django>=5.1,<5.3
+python-dotenv>=1.0
+psycopg[binary]>=3.2
+gunicorn>=22.0
+reportlab
+celery>=5.4,<6
+redis>=5.0,<6

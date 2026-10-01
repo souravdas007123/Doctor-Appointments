@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Dr. {{ doctor.user.get_full_name }} · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<div class="card">
+  <h1 style="margin-top:0">Dr. {{ doctor.user.get_full_name|default:doctor.user.email }}</h1>
+  <p>{{ doctor.specialization|default:"General" }}{% if doctor.qualification %} · {{ doctor.qualification }}{% endif %}</p>
+  <p class="muted">
+    {{ doctor.experience_years }} years experience
+    {% if doctor.hospital %} · {{ doctor.hospital }}{% endif %}{% if doctor.city %}, {{ doctor.city }}{% endif %}
+    · {{ doctor.get_consultation_mode_display }} · {{ doctor.get_slot_duration_display }} per visit
+  </p>
+  <p><strong>Consultation fee: ₹{{ doctor.consultation_fee|floatformat:"-2" }}</strong></p>
+  {% if doctor.bio %}<p>{{ doctor.bio|linebreaksbr }}</p>{% endif %}
+</div>
+
+<div class="card" style="margin-top:20px">
+  <h2>Available slots</h2>
+  <form method="get" style="display:flex; gap:12px; align-items:end; flex-wrap:wrap">
+    <p style="margin:0"><label for="date">Date</label>
+      <input id="date" type="date" name="date" value="{{ day|date:'Y-m-d' }}" min="{{ min_date }}" max="{{ max_date }}"></p>
+    <button type="submit">Show slots</button>
+  </form>
+  {% if error %}<p class="errorlist" role="alert">{{ error }}</p>{% endif %}
+  <h3>{{ day|date:"l, d F Y" }}</h3>
+  {% if slots %}
+    <form method="post" action="{% url 'appointments:book' %}">{% csrf_token %}
+      <input type="hidden" name="doctor" value="{{ doctor.pk }}">
+      <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+      <div class="slots" role="radiogroup" aria-label="Available slots">{% include "appointments/_slot_grid.html" %}</div>
+      <p><label for="reason">Reason for visit (optional)</label><textarea id="reason" name="reason" rows="2" maxlength="500"></textarea></p>
+      <button type="submit">Book appointment · ₹{{ doctor.consultation_fee|floatformat:"-2" }}</button>
+    </form>
+  {% elif not error %}
+    <p class="muted">Is din koi slot available nahi hai. Doosri date try karo.</p>
+  {% endif %}
+</div>
+
+<div class="card" style="margin-top:20px">
+  <h2>Weekly schedule</h2>
+  {% for label, windows in week %}
+    <div class="dayrow"><strong>{{ label }}</strong>
+      <div>{% for w in windows %}<div>{{ w.start_time|time:"h:i A" }} – {{ w.end_time|time:"h:i A" }}</div>{% empty %}<span class="muted">Off</span>{% endfor %}</div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

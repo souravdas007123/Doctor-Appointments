@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Hello, {{ user.first_name|default:"there" }}</h1>
+<div class="stats">
+  <div class="card stat"><strong>{{ stats.upcoming }}</strong><span>Upcoming</span></div>
+  <div class="card stat"><strong>{{ stats.completed }}</strong><span>Completed</span></div>
+  <div class="card stat"><strong>{{ stats.cancelled }}</strong><span>Cancelled</span></div>
+</div>
+<div class="card"><h2>Upcoming appointments</h2>
+  {% for a in next_appointments %}
+    <div class="dayrow"><strong>{{ a.appointment_date|date:"d M" }}, {{ a.start_time|time:"h:i A" }}</strong>
+      <div><a href="{% url 'appointments:detail' a.pk %}">Dr. {{ a.doctor.user.get_full_name|default:a.doctor.user.email }}</a> · {{ a.doctor.specialization|default:"General" }}</div></div>
+  {% empty %}
+    <p class="muted">Abhi koi appointment nahi hai. <a href="{% url 'patients:doctor_list' %}">Doctor dhundo</a>.</p>
+  {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Time off · CareSlot{% endblock %}
+{% block content %}
+{% include "doctors/_subnav.html" %}
+<h1>Time off</h1>
+<div class="card">
+  <h2>Upcoming</h2>
+  {% for b in upcoming %}
+    <div class="dayrow">
+      <strong>{{ b.date|date:"D, d M Y" }}</strong>
+      <div class="win">
+        <span>{% if b.is_full_day %}Full day{% else %}{{ b.start_time|time:"h:i A" }} – {{ b.end_time|time:"h:i A" }}{% endif %}{% if b.reason %} · <span class="muted">{{ b.reason }}</span>{% endif %}</span>
+        <form method="post" action="{% url 'doctors:time_off_delete' b.pk %}">{% csrf_token %}<button class="linkbtn" type="submit">Remove</button></form>
+      </div>
+    </div>
+  {% empty %}<p class="muted">Koi leave ya blocked slot nahi hai.</p>{% endfor %}
+</div>
+<div class="card" style="margin-top:20px">
+  <h2>Block a date or time</h2>
+  <form method="post" novalidate>{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save time off</button>
+  </form>
+</div>
+{% endblock %}

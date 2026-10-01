@@ -1,0 +1,9 @@
+<nav class="subnav" aria-label="Patient menu">
+  <a href="{% url 'patients:dashboard' %}">Dashboard</a>
+  <a href="{% url 'patients:doctor_list' %}">Find a doctor</a>
+  <a href="{% url 'appointments:list' %}">My appointments</a>
+  <a href="{% url 'payments:list' %}">Payments</a>
+  <a href="{% url 'patients:medical_records' %}">Medical records</a>
+  <a href="{% url 'patients:prescriptions' %}">Prescriptions</a>
+  <a href="{% url 'patients:profile' %}">Profile</a>
+</nav>

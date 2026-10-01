@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Medical records · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Medical records</h1>
+{% for r in records %}
+  <div class="card" style="margin-bottom:14px">
+    <div class="win">
+      <div>
+        <strong>{{ r.appointment.appointment_date|date:"d M Y" }}</strong> · Dr. {{ r.appointment.doctor.user.get_full_name|default:r.appointment.doctor.user.email }}
+        {% if r.diagnosis %}<div class="muted">{{ r.diagnosis|truncatewords:15 }}</div>{% endif %}
+      </div>
+      <a href="{% url 'medical:record_view' r.appointment_id %}">View</a>
+    </div>
+  </div>
+{% empty %}<div class="card"><p class="muted">Abhi koi medical record nahi hai.</p></div>{% endfor %}
+{% endblock %}

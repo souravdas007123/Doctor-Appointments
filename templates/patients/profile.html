@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Profile · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Your profile</h1>
+<div class="card narrow" style="margin:0">
+  <form method="post" novalidate>{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save profile</button>
+  </form>
+</div>
+{% endblock %}

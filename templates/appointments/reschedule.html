@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Reschedule · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Reschedule {{ appt.reference }}</h1>
+<p>Dr. {{ appt.doctor.user.get_full_name|default:appt.doctor.user.email }} · abhi: {{ appt.appointment_date|date:"d M Y" }}, {{ appt.start_time|time:"h:i A" }}</p>
+<div class="card">
+  <form method="get" style="display:flex; gap:12px; align-items:end; flex-wrap:wrap">
+    <p style="margin:0"><label for="date">New date</label>
+      <input id="date" type="date" name="date" value="{{ day|date:'Y-m-d' }}" min="{{ min_date }}" max="{{ max_date }}"></p>
+    <button type="submit">Show slots</button>
+  </form>
+  {% if error %}<p class="errorlist" role="alert">{{ error }}</p>{% endif %}
+  <h3>{{ day|date:"l, d F Y" }}</h3>
+  {% if slots %}
+    <form method="post">{% csrf_token %}
+      <input type="hidden" name="date" value="{{ day|date:'Y-m-d' }}">
+      <div class="slots" role="radiogroup" aria-label="Available slots">{% include "appointments/_slot_grid.html" %}</div>
+      <button type="submit">Confirm new time</button>
+    </form>
+  {% elif not error %}<p class="muted">Is din koi slot available nahi hai.</p>{% endif %}
+  <p><a href="{% url 'appointments:detail' appt.pk %}">Back to appointment</a></p>
+</div>
+{% endblock %}

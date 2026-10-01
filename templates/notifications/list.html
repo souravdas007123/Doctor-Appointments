@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Notifications · CareSlot{% endblock %}
+{% block content %}
+<div class="win" style="margin-bottom:14px">
+  <h1 style="margin:0">Notifications</h1>
+  {% if unread_notifications_count %}
+    <form method="post" action="{% url 'notifications:mark_all_read' %}">{% csrf_token %}<button type="submit">Mark all as read</button></form>
+  {% endif %}
+</div>
+{% for n in notifications %}
+  <a href="{% url 'notifications:open' n.pk %}" class="card notif-item {% if not n.is_read %}unread{% endif %}" style="display:block; margin-bottom:10px; text-decoration:none; color:inherit">
+    <div class="win">
+      <div>
+        <strong>{{ n.title }}</strong>
+        {% if n.message %}<div class="muted">{{ n.message }}</div>{% endif %}
+      </div>
+      <span class="muted" style="white-space:nowrap">{{ n.created_at|date:"d M, h:i A" }}</span>
+    </div>
+  </a>
+{% empty %}
+  <div class="card"><p class="muted">Abhi koi notification nahi hai.</p></div>
+{% endfor %}
+{% endblock %}

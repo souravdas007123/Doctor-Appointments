@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Prescriptions · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Prescriptions</h1>
+{% for p in prescriptions %}
+  <div class="card" style="margin-bottom:14px">
+    <div class="win">
+      <div>
+        <strong>{{ p.appointment.appointment_date|date:"d M Y" }}</strong> · Dr. {{ p.appointment.doctor.user.get_full_name|default:p.appointment.doctor.user.email }}
+      </div>
+      <div>
+        <a href="{% url 'medical:prescription_view' p.appointment_id %}">View</a>
+        <a href="{% url 'medical:prescription_pdf' p.appointment_id %}" style="margin-left:10px">PDF</a>
+      </div>
+    </div>
+  </div>
+{% empty %}<div class="card"><p class="muted">Abhi koi prescription nahi hai.</p></div>{% endfor %}
+{% endblock %}

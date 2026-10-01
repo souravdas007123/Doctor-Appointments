@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Prescription · CareSlot{% endblock %}
+{% block content %}
+{% include "appointments/_nav.html" %}
+<h1>Prescription</h1>
+<p class="muted">{{ appt.appointment_date|date:"d M Y" }} · Dr. {{ appt.doctor.user.get_full_name|default:appt.doctor.user.email }} & {{ appt.patient.user.get_full_name|default:appt.patient.user.email }}</p>
+<div class="card">
+  <table style="width:100%; border-collapse:collapse">
+    <thead><tr style="text-align:left; border-bottom:1px solid var(--line)">
+      <th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th>
+    </tr></thead>
+    <tbody>
+      {% for item in prescription.items.all %}
+        <tr style="border-bottom:1px solid var(--line)">
+          <td>{{ item.medicine_name }}</td><td>{{ item.dosage }}</td><td>{{ item.frequency }}</td>
+          <td>{{ item.duration }}</td><td>{{ item.instructions }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% if prescription.advice %}<p style="margin-top:14px"><strong>Advice:</strong> {{ prescription.advice|linebreaksbr }}</p>{% endif %}
+  {% if prescription.follow_up_days %}<p><strong>Follow-up:</strong> after {{ prescription.follow_up_days }} days</p>{% endif %}
+</div>
+<p>
+  <a class="btn" style="text-decoration:none" href="{% url 'medical:prescription_pdf' appt.pk %}">Download PDF</a>
+  {% if user.role == "doctor" %}<a href="{% url 'medical:prescription_edit' appt.pk %}" style="margin-left:14px">Edit prescription</a>{% endif %}
+</p>
+<p><a href="{% url 'appointments:detail' appt.pk %}">Back to appointment</a></p>
+{% endblock %}

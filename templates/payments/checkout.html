@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Payment · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Complete your payment</h1>
+<div class="card narrow" style="margin:0">
+  <p><strong>Dr. {{ appt.doctor.user.get_full_name|default:appt.doctor.user.email }}</strong></p>
+  <p>{{ appt.appointment_date|date:"l, d F Y" }}, {{ appt.start_time|time:"h:i A" }}</p>
+  <p style="font-size:1.4rem"><strong>₹{{ payment.amount|floatformat:"-2" }}</strong></p>
+  <p class="muted">Aapka slot {{ appt.payment_due_at|time:"h:i A" }} tak hold hai. Us tak payment na hui to slot free ho jayega.</p>
+  <button id="pay-btn" type="button">Pay ₹{{ payment.amount|floatformat:"-2" }}</button>
+  <form id="verify-form" method="post" action="{% url 'payments:verify' %}">{% csrf_token %}
+    <input type="hidden" name="razorpay_order_id" id="f-order">
+    <input type="hidden" name="razorpay_payment_id" id="f-pay">
+    <input type="hidden" name="razorpay_signature" id="f-sig">
+  </form>
+  <p><a href="{% url 'appointments:detail' appt.pk %}">Back to appointment</a></p>
+</div>
+{{ checkout|json_script:"checkout-data" }}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  (function () {
+    var cfg = JSON.parse(document.getElementById("checkout-data").textContent);
+    cfg.handler = function (r) {
+      document.getElementById("f-order").value = r.razorpay_order_id;
+      document.getElementById("f-pay").value = r.razorpay_payment_id;
+      document.getElementById("f-sig").value = r.razorpay_signature;
+      document.getElementById("verify-form").submit();
+    };
+    var rzp = new Razorpay(cfg);
+    document.getElementById("pay-btn").addEventListener("click", function () { rzp.open(); });
+  })();
+</script>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}{{ appt.reference }} · CareSlot{% endblock %}
+{% block content %}
+{% include "appointments/_nav.html" %}
+<h1>{{ appt.reference }} <span class="badge {{ appt.status }}">{{ appt.get_status_display }}</span></h1>
+<div class="card">
+  {% if user.role == "patient" %}
+    <p><strong>Doctor:</strong> <a href="{% url 'patients:doctor_detail' appt.doctor.pk %}">Dr. {{ appt.doctor.user.get_full_name|default:appt.doctor.user.email }}</a> · {{ appt.doctor.specialization|default:"General" }}</p>
+    {% if appt.doctor.hospital %}<p><strong>Where:</strong> {{ appt.doctor.hospital }}{% if appt.doctor.city %}, {{ appt.doctor.city }}{% endif %} ({{ appt.doctor.get_consultation_mode_display }})</p>{% endif %}
+  {% else %}
+    <p><strong>Patient:</strong> {{ appt.patient.user.get_full_name|default:appt.patient.user.email }}</p>
+  {% endif %}
+  <p><strong>When:</strong> {{ appt.appointment_date|date:"l, d F Y" }}, {{ appt.start_time|time:"h:i A" }} – {{ appt.end_time|time:"h:i A" }}</p>
+  <p><strong>Fee:</strong> ₹{{ appt.consultation_fee|floatformat:"-2" }}</p>
+  {% if appt.reason %}<p><strong>Reason:</strong> {{ appt.reason }}</p>{% endif %}
+  {% if appt.reschedule_count %}<p class="muted">Rescheduled {{ appt.reschedule_count }} time{{ appt.reschedule_count|pluralize }}</p>{% endif %}
+  {% if appt.status == "cancelled" %}<p class="muted">Cancelled by {{ appt.cancelled_by }}{% if appt.cancel_reason %}: {{ appt.cancel_reason }}{% endif %}</p>{% endif %}
+</div>
+
+{% if user.role == "doctor" and appt.status == "in_progress" %}
+<div class="card" style="margin-top:20px"><h2>Consultation</h2>
+  <p><a class="btn" style="text-decoration:none" href="{% url 'medical:record_edit' appt.pk %}">Consultation notes</a>
+     <a class="btn" style="text-decoration:none; margin-left:10px" href="{% url 'medical:prescription_edit' appt.pk %}">Prescription</a></p>
+</div>
+{% endif %}
+{% if appt.status == "completed" %}
+<div class="card" style="margin-top:20px"><h2>Medical records</h2>
+  <p><a href="{% url 'medical:record_view' appt.pk %}">View medical record</a> ·
+     <a href="{% url 'medical:prescription_view' appt.pk %}">View prescription</a></p>
+</div>
+{% endif %}
+{% if can_pay %}
+<div class="card" style="margin-top:20px"><h2>Payment</h2>
+  <p>₹{{ appt.consultation_fee|floatformat:"-2" }} baaki hai. Slot {{ appt.payment_due_at|time:"h:i A" }} tak hold hai.</p>
+  <a class="btn" style="text-decoration:none" href="{% url 'payments:checkout' appt.pk %}">Pay now</a>
+</div>
+{% elif payment %}
+<div class="card" style="margin-top:20px"><h2>Payment</h2>
+  <p>₹{{ payment.amount|floatformat:"-2" }} · {{ payment.get_status_display }}{% if refund %} · Refund: {{ refund.get_status_display }}{% endif %}</p>
+</div>
+{% endif %}
+
+{% if doctor_actions %}
+<div class="card" style="margin-top:20px"><h2>Consultation</h2>
+  {% for to, label in doctor_actions %}
+    <form method="post" action="{% url 'appointments:update_status' appt.pk %}" style="display:inline">{% csrf_token %}
+      <input type="hidden" name="to" value="{{ to }}"><button type="submit">{{ label }}</button></form>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% if can_reschedule or can_cancel or cancel_hint or resched_hint %}
+<div class="card" style="margin-top:20px"><h2>Manage</h2>
+  {% if can_reschedule %}<p><a class="btn" style="text-decoration:none" href="{% url 'appointments:reschedule' appt.pk %}">Reschedule</a></p>
+  {% elif resched_hint %}<p class="muted">{{ resched_hint }}</p>{% endif %}
+  {% if can_cancel %}
+    <form method="post" action="{% url 'appointments:cancel' appt.pk %}" onsubmit="return confirm('Appointment cancel karni hai?')">{% csrf_token %}
+      <p><label for="reason">Cancel reason (optional)</label><input id="reason" name="reason" maxlength="300"></p>
+      <button type="submit" style="background:#b91c1c">Cancel appointment</button>
+    </form>
+  {% elif cancel_hint %}<p class="muted">{{ cancel_hint }}</p>{% endif %}
+</div>
+{% endif %}
+
+<div class="card" style="margin-top:20px"><h2>History</h2>
+  {% for h in history %}
+    <div class="dayrow"><span class="muted">{{ h.created_at|date:"d M, h:i A" }}</span>
+      <div>{{ h.to_status }}{% if h.note %} · <span class="muted">{{ h.note }}</span>{% endif %}</div></div>
+  {% endfor %}
+</div>
+{% endblock %}

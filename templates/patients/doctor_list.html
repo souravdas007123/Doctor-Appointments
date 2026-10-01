@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Find a doctor · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Find a doctor</h1>
+<form method="get" class="card">
+  <div class="filters">{{ form.as_p }}</div>
+  <button type="submit">Search doctors</button>
+  <a href="{% url 'patients:doctor_list' %}" class="muted" style="margin-left:12px">Clear filters</a>
+</form>
+
+<p class="muted" style="margin-top:20px">
+  {{ page.paginator.count }} doctor{{ page.paginator.count|pluralize }} mile{% if day %} ({{ day|date:"d M Y" }} ko available){% endif %}
+</p>
+{% for d in page %}
+  <div class="card" style="margin-bottom:14px">
+    <div class="win">
+      <div>
+        <h2 style="margin:0"><a href="{% url 'patients:doctor_detail' d.pk %}">Dr. {{ d.user.get_full_name|default:d.user.email }}</a></h2>
+        <div>{{ d.specialization|default:"General" }}{% if d.qualification %} · {{ d.qualification }}{% endif %}</div>
+        <div class="muted">{% if d.hospital %}{{ d.hospital }}{% endif %}{% if d.city %}, {{ d.city }}{% endif %} · {{ d.experience_years }} yr experience · {{ d.get_consultation_mode_display }}</div>
+      </div>
+      <div style="text-align:right">
+        <strong>₹{{ d.consultation_fee|floatformat:"-2" }}</strong>
+        <div><a class="btn" style="display:inline-block;margin-top:6px;text-decoration:none" href="{% url 'patients:doctor_detail' d.pk %}{% if day %}?date={{ day|date:'Y-m-d' }}{% endif %}">View slots</a></div>
+      </div>
+    </div>
+  </div>
+{% empty %}
+  <div class="card"><p class="muted">Koi doctor nahi mila. Filters kam karke dobara try karo.</p></div>
+{% endfor %}
+
+{% if page.has_other_pages %}
+  <p>
+    {% if page.has_previous %}<a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page.previous_page_number }}">Previous</a>{% endif %}
+    Page {{ page.number }} of {{ page.paginator.num_pages }}
+    {% if page.has_next %}<a href="?{% if querystring %}{{ querystring }}&{% endif %}page={{ page.next_page_number }}">Next</a>{% endif %}
+  </p>
+{% endif %}
+{% endblock %}

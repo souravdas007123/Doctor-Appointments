@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Verification pending · CareSlot{% endblock %}
+{% block content %}
+{% include "doctors/_subnav.html" %}
+<h1>Dr. {{ user.get_full_name|default:user.email }}</h1>
+<div class="notice">
+  <strong>Verification pending.</strong>
+  Admin aapka profile verify karega, uske baad aap patients ko dikhenge aur appointments le sakenge.
+</div>
+{% endblock %}

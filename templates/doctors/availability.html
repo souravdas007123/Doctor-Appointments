@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Availability · CareSlot{% endblock %}
+{% block content %}
+{% include "doctors/_subnav.html" %}
+<h1>Weekly availability</h1>
+<p class="muted">Consultation duration: <strong>{{ doctor.get_slot_duration_display }}</strong>. <a href="{% url 'doctors:profile' %}">Change</a></p>
+<div class="card">
+  {% for label, windows in days %}
+    <div class="dayrow">
+      <strong>{{ label }}</strong>
+      <div>
+        {% for w in windows %}
+          <div class="win">
+            {{ w.start_time|time:"h:i A" }} – {{ w.end_time|time:"h:i A" }}
+            <form method="post" action="{% url 'doctors:availability_delete' w.pk %}">{% csrf_token %}<button class="linkbtn" type="submit">Remove</button></form>
+          </div>
+        {% empty %}<span class="muted">Off</span>{% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+</div>
+<div class="card" style="margin-top:20px">
+  <h2>Add a time window</h2>
+  <form method="post" novalidate>{% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add window</button>
+  </form>
+</div>
+{% endblock %}

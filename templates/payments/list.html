@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Payments · CareSlot{% endblock %}
+{% block content %}
+{% include "patients/_subnav.html" %}
+<h1>Payments</h1>
+{% for p in payments %}
+  <div class="card" style="margin-bottom:14px">
+    <div class="win">
+      <div>
+        <strong>₹{{ p.amount|floatformat:"-2" }}</strong> · {{ p.get_status_display }}
+        <div>Dr. {{ p.appointment.doctor.user.get_full_name|default:p.appointment.doctor.user.email }} · {{ p.appointment.appointment_date|date:"d M Y" }}</div>
+        {% for r in p.refunds.all %}<div class="muted">Refund ₹{{ r.amount|floatformat:"-2" }}: {{ r.get_status_display }}</div>{% endfor %}
+      </div>
+      <a href="{% url 'appointments:detail' p.appointment_id %}">Appointment</a>
+    </div>
+  </div>
+{% empty %}<div class="card"><p class="muted">Abhi koi payment nahi hai.</p></div>{% endfor %}
+{% endblock %}

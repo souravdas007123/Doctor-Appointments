@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}{% if is_new %}Add{% else %}Edit{% endif %} prescription · CareSlot{% endblock %}
+{% block content %}
+{% include "doctors/_subnav.html" %}
+<h1>{% if is_new %}Add{% else %}Edit{% endif %} prescription</h1>
+<p class="muted">{{ appt.appointment_date|date:"d M Y" }} · Patient: {{ appt.patient.user.get_full_name|default:appt.patient.user.email }}</p>
+<div class="card">
+  <form method="post" novalidate>{% csrf_token %}
+    {{ formset.management_form }}
+    {% if formset.non_form_errors %}<ul class="errorlist">{% for e in formset.non_form_errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+    <h2>Medicines</h2>
+    <table style="width:100%; border-collapse:collapse; margin-bottom:16px">
+      <thead><tr style="text-align:left">
+        <th>Medicine</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th>{% if formset.can_delete %}<th>Remove</th>{% endif %}
+      </tr></thead>
+      <tbody>
+        {% for f in formset %}
+          <tr>
+            {% for hidden in f.hidden_fields %}{{ hidden }}{% endfor %}
+            <td>{{ f.medicine_name }}</td><td>{{ f.dosage }}</td><td>{{ f.frequency }}</td><td>{{ f.duration }}</td>
+            <td>{{ f.instructions }}</td>{% if f.DELETE %}<td>{{ f.DELETE }}</td>{% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <h2>Advice</h2>
+    {{ form.as_p }}
+    <button type="submit">Save prescription</button>
+  </form>
+</div>
+<p><a href="{% url 'appointments:detail' appt.pk %}">Back to appointment</a></p>
+{% endblock %}

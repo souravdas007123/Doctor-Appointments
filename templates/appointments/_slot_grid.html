@@ -1,0 +1,1 @@
+{% for start, end in slots %}<label class="slot"><input type="radio" name="start" value="{{ start|time:'H:i' }}" required><span>{{ start|time:"h:i A" }}</span></label>{% endfor %}
