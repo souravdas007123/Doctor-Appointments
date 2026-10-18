@@ -26,7 +26,11 @@ class NotificationTriggerTests(TestCase):
         self.patient = PatientProfile.objects.create(user=make_user("p@x.com", "patient", "Pat", phone="+919876543210"))
 
     def test_booking_notifies_patient_and_doctor(self):
-        appt = appt_services.book_appointment(patient=self.patient, doctor=self.doctor, day=self.day, start_time=time(9))
+        # notify() ka .delay() transaction.on_commit() ke andar hai (services.py) -- production mein
+        # sahi hai (sirf real commit par chale), lekin TestCase ka transaction kabhi commit nahi hota,
+        # isliye on_commit callbacks khud test karne ke liye yahan explicitly force karna padta hai.
+        with self.captureOnCommitCallbacks(execute=True):
+            appt = appt_services.book_appointment(patient=self.patient, doctor=self.doctor, day=self.day, start_time=time(9))
         self.assertTrue(Notification.objects.filter(recipient=self.patient.user, notification_type=Notification.Type.APPOINTMENT_CONFIRMED, appointment=appt).exists())
         self.assertTrue(Notification.objects.filter(recipient=self.doctor.user, notification_type=Notification.Type.NEW_APPOINTMENT, appointment=appt).exists())
         # Email eager mode mein turant "sent" (console backend) DeliveryAttempt bana deta hai
@@ -62,7 +66,9 @@ class NotificationTriggerTests(TestCase):
         from apps.appointments.models import Appointment
         Appointment.objects.filter(pk=appt.pk).update(appointment_date=near.date())
         appt.refresh_from_db(); appt.start_time = near.time(); appt.save(update_fields=["start_time"])
-        appt_services.send_due_reminders()
+        # on_commit callback force karo (dekho upar ki note test_booking_notifies_patient_and_doctor mein)
+        with self.captureOnCommitCallbacks(execute=True):
+            appt_services.send_due_reminders()
         notif = Notification.objects.get(notification_type=Notification.Type.APPOINTMENT_REMINDER)
         self.assertTrue(DeliveryAttempt.objects.filter(notification=notif, channel="sms", status="sent").exists())  # patient ka phone hai
 
@@ -70,7 +76,8 @@ class NotificationTriggerTests(TestCase):
         from apps.notifications.services import notify
         no_phone_patient = make_user("np@x.com", "patient", "NoPhone")   # phone="" (default)
         PatientProfile.objects.create(user=no_phone_patient)
-        notif = notify(no_phone_patient, Notification.Type.APPOINTMENT_REMINDER, "Reminder", "test")
+        with self.captureOnCommitCallbacks(execute=True):
+            notif = notify(no_phone_patient, Notification.Type.APPOINTMENT_REMINDER, "Reminder", "test")
         self.assertTrue(DeliveryAttempt.objects.filter(notification=notif, channel="sms", status="skipped").exists())
 
 
