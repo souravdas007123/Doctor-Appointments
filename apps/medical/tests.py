@@ -1,7 +1,6 @@
 from datetime import time, timedelta
 from io import BytesIO
 
-from django.core.exceptions import PermissionDenied
 from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -56,10 +55,14 @@ class AccessControlTests(MedicalTestBase):
         self.assertEqual(self.client.get(reverse("medical:record_view", args=[self.appt.pk])).status_code, 404)
 
     def test_patient_cannot_edit_record(self):
+        # View (`record_edit`) `PermissionDenied` raise karta hai jab request.user.role != "doctor" -- sahi hai.
+        # Lekin Django ka exception-handling middleware PermissionDenied ko khud catch karke 403 response
+        # mein badal deta hai, isliye wo test client tak Python exception ke roop mein kabhi propagate
+        # nahi hoti; assertRaises(PermissionDenied) is liye galat tha -- status code check karna sahi hai.
         self.start_consultation()
         self.client.force_login(self.patient.user)
-        with self.assertRaises(PermissionDenied):
-            self.client.get(reverse("medical:record_edit", args=[self.appt.pk]), follow=False)
+        resp = self.client.get(reverse("medical:record_edit", args=[self.appt.pk]))
+        self.assertEqual(resp.status_code, 403)
 
 
 class RecordAndPrescriptionFlowTests(MedicalTestBase):

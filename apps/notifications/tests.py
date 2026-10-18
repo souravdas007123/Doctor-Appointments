@@ -54,7 +54,11 @@ class NotificationTriggerTests(TestCase):
         Appointment.objects.filter(pk=appt.pk).update(appointment_date=near.date())
         appt.refresh_from_db()
         appt.start_time = near.time()
-        appt.save(update_fields=["start_time"])
+        # end_time ko bhi aage badhana zaroori hai, warna DB ka "end_time > start_time" CHECK constraint
+        # tootta hai jab test din ke kisi aise waqt chale jahan near.time() purani end_time (09:30) se aage ho
+        # -- isse pehle ye test chalne ke waqt (time of day) par depend karta tha (flaky).
+        appt.end_time = (near + timedelta(minutes=30)).time()
+        appt.save(update_fields=["start_time", "end_time"])
         sent_first = appt_services.send_due_reminders()
         sent_second = appt_services.send_due_reminders()
         self.assertEqual((sent_first, sent_second), (1, 0))
@@ -65,7 +69,12 @@ class NotificationTriggerTests(TestCase):
         near = timezone.now() + timedelta(hours=1)
         from apps.appointments.models import Appointment
         Appointment.objects.filter(pk=appt.pk).update(appointment_date=near.date())
-        appt.refresh_from_db(); appt.start_time = near.time(); appt.save(update_fields=["start_time"])
+        appt.refresh_from_db()
+        appt.start_time = near.time()
+        # end_time ko bhi aage badhao -- warna CHECK constraint (end_time > start_time) time-of-day
+        # ke hisaab se kabhi pass kabhi fail hota (flaky), jaisa upar wale test mein tha.
+        appt.end_time = (near + timedelta(minutes=30)).time()
+        appt.save(update_fields=["start_time", "end_time"])
         # on_commit callback force karo (dekho upar ki note test_booking_notifies_patient_and_doctor mein)
         with self.captureOnCommitCallbacks(execute=True):
             appt_services.send_due_reminders()
