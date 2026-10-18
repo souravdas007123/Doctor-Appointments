@@ -1,5 +1,4 @@
 from datetime import time, timedelta
-from unittest import mock
 
 from django.test import TestCase
 from django.urls import reverse

@@ -15,15 +15,26 @@ from django.utils import timezone
 
 from apps.doctors.models import DoctorProfile
 from apps.doctors.slots import get_available_slots
-from apps.patients.models import PatientProfile
 from apps.notifications.models import Notification
 from apps.notifications.services import notify
+from apps.patients.models import PatientProfile
 from apps.payments import services as payment_services
 
-from .models import (ACTIVE_STATUSES, CANCELLABLE_STATUSES, Appointment, AppointmentStatus,
-                     AppointmentStatusHistory)
-from .rules import (CHECKIN_MINUTES_BEFORE, MAX_BOOKING_DAYS, MAX_RESCHEDULES, MIN_NOTICE_HOURS,
-                    PAYMENT_HOLD_MINUTES, REMINDER_HOURS_BEFORE)
+from .models import (
+    ACTIVE_STATUSES,
+    CANCELLABLE_STATUSES,
+    Appointment,
+    AppointmentStatus,
+    AppointmentStatusHistory,
+)
+from .rules import (
+    CHECKIN_MINUTES_BEFORE,
+    MAX_BOOKING_DAYS,
+    MAX_RESCHEDULES,
+    MIN_NOTICE_HOURS,
+    PAYMENT_HOLD_MINUTES,
+    REMINDER_HOURS_BEFORE,
+)
 
 S = AppointmentStatus
 NOT_YOURS = "Ye appointment aapki nahi hai."

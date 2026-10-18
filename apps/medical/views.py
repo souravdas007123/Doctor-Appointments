@@ -2,15 +2,19 @@ from django.contrib import messages
 from django.core.exceptions import PermissionDenied
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.views.decorators.http import require_POST
 
 from apps.appointments.models import Appointment
-
-from .forms import MedicalRecordForm, PrescriptionForm, PrescriptionItemFormSet
 from apps.notifications.models import Notification
 from apps.notifications.services import notify
 
-from .models import (CONSULTABLE_STATUSES, AuditLog, MedicalRecord, Prescription, log_access)
+from .forms import MedicalRecordForm, PrescriptionForm, PrescriptionItemFormSet
+from .models import (
+    CONSULTABLE_STATUSES,
+    AuditLog,
+    MedicalRecord,
+    Prescription,
+    log_access,
+)
 from .pdf import build_prescription_pdf
 
 

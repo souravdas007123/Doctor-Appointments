@@ -1,8 +1,8 @@
 """Beat schedule se chalne wala periodic task. Asal logic services.py mein hai."""
 from celery import shared_task
 
-from .models import Refund
 from . import services
+from .models import Refund
 
 
 @shared_task

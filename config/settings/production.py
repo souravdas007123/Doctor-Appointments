@@ -1,6 +1,6 @@
 import os
 
-from .base import *  # noqa
+from .base import *
 
 DEBUG = False
 # Production mein tasks asal mein async chalein (worker + Redis chahiye)

@@ -15,7 +15,7 @@ class PaymentConfigError(Exception):
 
 
 def to_paise(amount):
-    return int((Decimal(amount) * 100).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+    return int((Decimal(amount) * 100).quantize(Decimal(1), rounding=ROUND_HALF_UP))
 
 
 class RazorpayGateway:

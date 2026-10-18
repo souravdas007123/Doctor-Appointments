@@ -42,6 +42,7 @@ def get_available_slots(doctor, day):
     from django.utils import timezone
 
     from apps.appointments.models import ACTIVE_STATUSES, Appointment, AppointmentStatus
+
     from .models import DoctorAvailability, DoctorBlockedSlot
 
     windows = list(

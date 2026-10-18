@@ -8,9 +8,9 @@ from django.utils import timezone
 
 from apps.accounts.decorators import role_required
 from apps.appointments.models import ACTIVE_STATUSES, Appointment, AppointmentStatus
-from apps.medical.models import MedicalRecord, Prescription
 from apps.doctors.models import DoctorAvailability, DoctorProfile
 from apps.doctors.slots import get_available_slots
+from apps.medical.models import MedicalRecord, Prescription
 
 from .forms import MAX_BOOKING_DAYS, DoctorSearchForm, PatientProfileForm
 

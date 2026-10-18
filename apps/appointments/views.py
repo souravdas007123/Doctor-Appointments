@@ -14,7 +14,12 @@ from apps.doctors.models import DoctorProfile
 from apps.doctors.slots import get_available_slots
 
 from . import services
-from .models import ACTIVE_STATUSES, CANCELLABLE_STATUSES, Appointment, AppointmentStatus
+from .models import (
+    ACTIVE_STATUSES,
+    CANCELLABLE_STATUSES,
+    Appointment,
+    AppointmentStatus,
+)
 from .rules import MAX_BOOKING_DAYS, PAYMENT_HOLD_MINUTES
 
 RELATED = ("doctor__user", "doctor__specialization", "patient__user")

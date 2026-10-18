@@ -7,7 +7,11 @@ import logging
 from django.db import IntegrityError, transaction
 from django.utils import timezone
 
-from apps.appointments.models import Appointment, AppointmentStatus, AppointmentStatusHistory
+from apps.appointments.models import (
+    Appointment,
+    AppointmentStatus,
+    AppointmentStatusHistory,
+)
 from apps.notifications.models import Notification
 from apps.notifications.services import notify
 
