@@ -51,13 +51,19 @@ class NotificationTriggerTests(TestCase):
         appt = appt_services.book_appointment(patient=self.patient, doctor=self.doctor, day=self.day, start_time=time(9))
         from apps.appointments.models import Appointment
         near = timezone.now() + timedelta(hours=2)
-        Appointment.objects.filter(pk=appt.pk).update(appointment_date=near.date())
+        # appointment_date/start_time naive, LOCAL wall-clock fields hain (Appointment.starts_at unhe
+        # TIME_ZONE, Asia/Kolkata, mein wapas aware karta hai). timezone.now() UTC mein aata hai (USE_TZ=True),
+        # isliye .date()/.time() seedhe UTC par lagana galat local time de deta -- IST (+5:30) mein ye
+        # appointment ko ~5:30 ghante "peeche" (past mein) daal deta, aur reminder kabhi "due" nahi dikhta.
+        # localtime() se pehle IST mein convert karna zaroori hai.
+        near_local = timezone.localtime(near)
+        Appointment.objects.filter(pk=appt.pk).update(appointment_date=near_local.date())
         appt.refresh_from_db()
-        appt.start_time = near.time()
+        appt.start_time = near_local.time()
         # end_time ko bhi aage badhana zaroori hai, warna DB ka "end_time > start_time" CHECK constraint
         # tootta hai jab test din ke kisi aise waqt chale jahan near.time() purani end_time (09:30) se aage ho
         # -- isse pehle ye test chalne ke waqt (time of day) par depend karta tha (flaky).
-        appt.end_time = (near + timedelta(minutes=30)).time()
+        appt.end_time = timezone.localtime(near + timedelta(minutes=30)).time()
         appt.save(update_fields=["start_time", "end_time"])
         sent_first = appt_services.send_due_reminders()
         sent_second = appt_services.send_due_reminders()
@@ -68,12 +74,14 @@ class NotificationTriggerTests(TestCase):
         appt = appt_services.book_appointment(patient=self.patient, doctor=self.doctor, day=self.day, start_time=time(9))
         near = timezone.now() + timedelta(hours=1)
         from apps.appointments.models import Appointment
-        Appointment.objects.filter(pk=appt.pk).update(appointment_date=near.date())
+        # UTC -> local (Asia/Kolkata) convert karna zaroori hai (dekho note upar wale test mein).
+        near_local = timezone.localtime(near)
+        Appointment.objects.filter(pk=appt.pk).update(appointment_date=near_local.date())
         appt.refresh_from_db()
-        appt.start_time = near.time()
+        appt.start_time = near_local.time()
         # end_time ko bhi aage badhao -- warna CHECK constraint (end_time > start_time) time-of-day
         # ke hisaab se kabhi pass kabhi fail hota (flaky), jaisa upar wale test mein tha.
-        appt.end_time = (near + timedelta(minutes=30)).time()
+        appt.end_time = timezone.localtime(near + timedelta(minutes=30)).time()
         appt.save(update_fields=["start_time", "end_time"])
         # on_commit callback force karo (dekho upar ki note test_booking_notifies_patient_and_doctor mein)
         with self.captureOnCommitCallbacks(execute=True):
