@@ -54,10 +54,18 @@
   {% if can_reschedule %}<p><a class="btn" style="text-decoration:none" href="{% url 'appointments:reschedule' appt.pk %}">Reschedule</a></p>
   {% elif resched_hint %}<p class="muted">{{ resched_hint }}</p>{% endif %}
   {% if can_cancel %}
-    <form method="post" action="{% url 'appointments:cancel' appt.pk %}" onsubmit="return confirm('Appointment cancel karni hai?')">{% csrf_token %}
-      <p><label for="reason">Cancel reason (optional)</label><input id="reason" name="reason" maxlength="300"></p>
-      <button type="submit" style="background:#b91c1c">Cancel appointment</button>
-    </form>
+    <button type="button" style="background:var(--danger-fill)" onclick="document.getElementById('cancel-dialog').showModal()">Cancel appointment</button>
+    <dialog id="cancel-dialog">
+      <form method="post" action="{% url 'appointments:cancel' appt.pk %}">{% csrf_token %}
+        <h2>Appointment cancel karni hai?</h2>
+        <p class="muted">Ye action undo nahi ho sakta.</p>
+        <p><label for="reason">Cancel reason (optional)</label><input id="reason" name="reason" maxlength="300"></p>
+        <div style="display:flex; gap:10px; justify-content:flex-end; margin-top:18px">
+          <button type="submit" formmethod="dialog" style="background:none; color:var(--muted); box-shadow:none">Keep appointment</button>
+          <button type="submit" style="background:var(--danger-fill)">Yes, cancel it</button>
+        </div>
+      </form>
+    </dialog>
   {% elif cancel_hint %}<p class="muted">{{ cancel_hint }}</p>{% endif %}
 </div>
 {% endif %}
